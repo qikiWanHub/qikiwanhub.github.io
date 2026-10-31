@@ -1,264 +1,921 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QikiWanHub</title>
+<meta name="theme-color" content="#050907">
+<meta name="description" content="QikiWanHub 个人项目导航">
+<title>QikiWanHub · 项目导航</title>
+
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #050907;
+  --green: #00ff65;
+  --green-dim: #559c70;
+  --cyan: #00fff0;
+  --line: rgba(0,255,101,.22);
+  --text: #d9ffe4;
+}
 
-  :root {
-    --green: #00ff41;
-    --green-dim: #00a02a;
-    --cyan: #00fff9;
-    --magenta: #ff00c1;
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  color: var(--text);
+  background:
+    radial-gradient(ellipse at 50% -15%,
+      rgba(0,255,101,.09), transparent 42rem),
+    var(--bg);
+  font-family: Consolas, "Courier New",
+    "Microsoft YaHei", monospace;
+}
+
+button, input {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  color: #001b08;
+  background: var(--green);
+}
+
+/* 背景特效 */
+
+#matrix {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  opacity: .17;
+  pointer-events: none;
+}
+
+.scanlines,
+.vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.scanlines {
+  z-index: 2;
+  opacity: .23;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 3px,
+    rgba(0,0,0,.36) 4px
+  );
+}
+
+.vignette {
+  z-index: 1;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 20%,
+    rgba(0,0,0,.58) 100%
+  );
+}
+
+/* 页面布局 */
+
+.page {
+  position: relative;
+  z-index: 3;
+  width: min(900px, calc(100% - 36px));
+  min-height: 100vh;
+  margin: auto;
+  padding: 28px 0 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid rgba(0,255,101,.14);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--green);
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: .12em;
+}
+
+.brand-icon {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  background: rgba(0,255,101,.07);
+  display: grid;
+  place-items: center;
+  color: var(--green);
+  font-size: 19px;
+  box-shadow: 0 0 18px rgba(0,255,101,.1);
+}
+
+.top-meta {
+  color: var(--green-dim);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-align: right;
+}
+
+/* 标题 */
+
+.hero {
+  padding: 63px 0 34px;
+}
+
+.prompt {
+  margin-bottom: 17px;
+  color: var(--green-dim);
+  font-size: 12px;
+}
+
+.cursor {
+  display: inline-block;
+  width: .62em;
+  height: 1em;
+  margin-left: 4px;
+  vertical-align: -.15em;
+  background: var(--green);
+  animation: blink 1s steps(2,start) infinite;
+}
+
+@keyframes blink {
+  to { visibility: hidden; }
+}
+
+h1 {
+  margin: 0;
+  color: var(--green);
+  font-size: clamp(2.4rem, 8vw, 5rem);
+  line-height: 1;
+  letter-spacing: .055em;
+  text-shadow:
+    0 0 10px rgba(0,255,101,.55),
+    0 0 30px rgba(0,255,101,.18);
+}
+
+.subtitle {
+  margin-top: 15px;
+  color: var(--green-dim);
+  font-size: 12px;
+  letter-spacing: .22em;
+}
+
+.hero-note {
+  max-width: 560px;
+  margin-top: 22px;
+  color: #8ab99a;
+  font-family: system-ui, "Microsoft YaHei", sans-serif;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+/* 分隔线 */
+
+.rule {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 17px;
+  color: rgba(0,255,101,.48);
+  font-size: 10px;
+  letter-spacing: .14em;
+}
+
+.rule::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(
+    90deg, var(--line), transparent
+  );
+}
+
+/* 搜索框 */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.search-wrap {
+  position: relative;
+  flex: 1;
+}
+
+.search-icon {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+  color: var(--green-dim);
+  pointer-events: none;
+}
+
+#search {
+  width: 100%;
+  min-height: 43px;
+  padding: 10px 13px 10px 39px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  outline: none;
+  color: var(--text);
+  background: rgba(0,18,7,.78);
+  font-size: 12px;
+}
+
+#search::placeholder {
+  color: #578467;
+}
+
+#search:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 18px rgba(0,255,101,.12);
+}
+
+.count {
+  color: var(--green-dim);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+/* 分类按钮 */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 18px;
+}
+
+.filter {
+  padding: 7px 11px;
+  border: 1px solid rgba(0,255,101,.2);
+  border-radius: 2px;
+  color: #75aa86;
+  background: rgba(0,20,8,.55);
+  font-size: 10px;
+  cursor: pointer;
+  transition: .18s ease;
+}
+
+.filter:hover,
+.filter.active {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(0,255,101,.08);
+  box-shadow: 0 0 13px rgba(0,255,101,.08);
+}
+
+/* 项目卡片 */
+
+.project-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 13px;
+}
+
+.project {
+  min-height: 145px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  padding: 17px 18px 15px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(0,255,101,.045),
+      transparent 62%
+    ),
+    rgba(0,22,8,.78);
+  text-decoration: none;
+  transition: .2s ease;
+}
+
+.project:hover,
+.project:focus-visible {
+  transform: translateY(-3px);
+  border-color: rgba(0,255,101,.75);
+  box-shadow: 0 8px 30px rgba(0,255,101,.1);
+  outline: none;
+}
+
+.project[hidden] {
+  display: none;
+}
+
+.project-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.project-index {
+  color: var(--green-dim);
+  font-size: 10px;
+  letter-spacing: .13em;
+}
+
+.project-type {
+  padding: 4px 7px;
+  border: 1px solid rgba(0,255,101,.2);
+  color: #75b98a;
+  font-size: 9px;
+}
+
+.project-name {
+  color: var(--green);
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.project-desc {
+  color: #85ad92;
+  font-family: system-ui, "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.project-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid rgba(0,255,101,.11);
+  color: #5f9a72;
+  font-size: 9px;
+}
+
+.project-arrow {
+  color: var(--green);
+  font-size: 16px;
+  transition: transform .2s ease;
+}
+
+.project:hover .project-arrow {
+  transform: translateX(4px);
+}
+
+/* 搜索无结果 */
+
+.empty {
+  display: none;
+  padding: 30px 15px;
+  border: 1px dashed var(--line);
+  color: var(--green-dim);
+  text-align: center;
+  font-size: 12px;
+}
+
+.empty.show {
+  display: block;
+}
+
+/* 页脚 */
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 40px;
+  color: #52745d;
+  font-size: 9px;
+  line-height: 1.7;
+}
+
+.footer a {
+  color: #66ad7b;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: var(--green);
+}
+
+/* 手机适配 */
+
+@media (max-width: 620px) {
+  .page {
+    width: calc(100% - 28px);
+    padding-top: 18px;
   }
 
-  html, body {
-    min-height: 100%;
-    background: #000;
-    color: var(--green);
-    font-family: 'Courier New', Courier, monospace;
-    overflow-x: hidden;
+  .hero {
+    padding: 48px 0 27px;
   }
 
-  ::selection { background: var(--green); color: #000; }
-
-  #matrix {
-    position: fixed; inset: 0; z-index: 0; opacity: .15;
-  }
-  .scanlines {
-    position: fixed; inset: 0; z-index: 2; pointer-events: none;
-    background: repeating-linear-gradient(
-      to bottom,
-      transparent 0px, transparent 2px,
-      rgba(0,0,0,.28) 3px, rgba(0,0,0,.28) 4px
-    );
-    opacity: .5;
-  }
-  .vignette {
-    position: fixed; inset: 0; z-index: 3; pointer-events: none;
-    background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,.9) 100%);
+  .project-list {
+    grid-template-columns: 1fr;
   }
 
-  main {
-    position: relative; z-index: 5;
-    min-height: 100vh;
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 90px 24px 60px;
-    display: flex;
+  .project {
+    min-height: 132px;
+  }
+
+  .top-meta {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 390px) {
+  .toolbar {
+    align-items: stretch;
     flex-direction: column;
   }
 
-  .prompt {
-    font-size: .85rem;
-    color: var(--green-dim);
-    margin-bottom: 20px;
-    letter-spacing: .05em;
-  }
-  .prompt .cursor {
-    display: inline-block;
-    width: .6em; height: 1em;
-    background: var(--green);
-    vertical-align: -.15em;
-    margin-left: 2px;
-    animation: blink 1s step-end infinite;
-  }
-  @keyframes blink { 50% { opacity: 0; } }
-
-  h1 {
-    position: relative;
-    font-size: clamp(2.2rem, 11vw, 4.8rem);
-    line-height: 1;
-    letter-spacing: .08em;
-    color: var(--green);
-    text-shadow: 0 0 8px rgba(0,255,65,.7), 0 0 26px rgba(0,255,65,.3);
-    animation: flicker 5s infinite;
-    user-select: none;
-  }
-  h1::before, h1::after {
-    content: attr(data-text);
-    position: absolute; top: 0; left: 0;
-    width: 100%; background: #000; overflow: hidden;
-  }
-  h1::before {
-    color: var(--cyan);
-    clip-path: inset(0 0 58% 0);
-    animation: glitchA 2.6s infinite linear alternate-reverse;
-  }
-  h1::after {
-    color: var(--magenta);
-    clip-path: inset(56% 0 0 0);
-    animation: glitchB 3.1s infinite linear alternate-reverse;
-  }
-  @keyframes glitchA {
-    0%,100% { transform: translate(0,0); }
-    25% { transform: translate(-3px,1px); }
-    50% { transform: translate(-1px,-1px); }
-    75% { transform: translate(3px,1px); }
-  }
-  @keyframes glitchB {
-    0%,100% { transform: translate(0,0); }
-    25% { transform: translate(3px,-1px); }
-    50% { transform: translate(-2px,1px); }
-    75% { transform: translate(2px,2px); }
-  }
-  @keyframes flicker {
-    0%, 94%, 100% { opacity: 1; }
-    95% { opacity: .5; }
-    96% { opacity: 1; }
-    97% { opacity: .7; }
-    98% { opacity: 1; }
+  .count {
+    text-align: right;
   }
 
-  .subtitle {
-    margin-top: 16px;
-    font-size: .78rem;
-    letter-spacing: .3em;
-    color: var(--green-dim);
-    text-transform: uppercase;
-  }
-
-  .divider {
-    margin: 44px 0 30px;
-    font-size: .75rem;
-    letter-spacing: .1em;
-    color: rgba(0,160,42,.55);
-    white-space: nowrap;
-    overflow: hidden;
-  }
-
-  .list {
-    display: flex;
+  .footer {
     flex-direction: column;
-    gap: 14px;
-    flex: 1;
+    align-items: flex-start;
   }
+}
 
-  .item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 16px 20px;
-    border: 1px solid rgba(0,255,65,.28);
-    background: rgba(0,18,4,.55);
-    color: var(--green);
-    text-decoration: none;
-    font-size: 1rem;
-    letter-spacing: .04em;
-    transition: all .22s ease;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
   }
-  .item:hover, .item:focus {
-    border-color: var(--green);
-    background: rgba(0,255,65,.08);
-    box-shadow: 0 0 22px rgba(0,255,65,.3);
-    outline: none;
-    transform: translateX(4px);
-  }
-  .item .idx {
-    color: var(--green-dim);
-    font-size: .8rem;
-    letter-spacing: .1em;
-  }
-  .item .name {
-    flex: 1;
-  }
-  .item .meta {
-    font-size: .72rem;
-    color: var(--green-dim);
-    letter-spacing: .1em;
-  }
-  .item .arrow {
-    color: var(--green-dim);
-    transition: transform .22s ease, color .22s;
-  }
-  .item:hover .arrow {
-    color: var(--green);
-    transform: translateX(4px);
-  }
-
-  @media (max-width: 480px) {
-    main { padding: 60px 18px 40px; }
-    .item { padding: 14px 16px; font-size: .92rem; }
-    .item .meta { display: none; }
-  }
+}
 </style>
 </head>
+
 <body>
 
-<canvas id="matrix"></canvas>
-<div class="scanlines"></div>
+<canvas id="matrix" aria-hidden="true"></canvas>
 <div class="vignette"></div>
+<div class="scanlines"></div>
 
-<main>
+<main class="page">
 
-  <div class="prompt">root@qikiwanhub:~$ ls ./projects<span class="cursor"></span></div>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-icon">⌘</span>
+    <span>QIKIWANHUB</span>
+  </div>
+  <div class="top-meta">
+    PERSONAL PROJECTS<br>
+    网页导航系统 / V2.0
+  </div>
+</header>
 
-  <h1 data-text="QikiWanHub">QikiWanHub</h1>
-  <p class="subtitle">// Works Navigation</p>
+<section class="hero">
 
-  <div class="divider">──────────────────────────────────</div>
+  <div class="prompt">
+    root@qikiwanhub:~$ open ./projects
+    <span class="cursor"></span>
+  </div>
 
-  <!-- 项目列表：以后加新网站，就往这里加 <a> 标签 -->
-  <nav class="list">
+  <h1>QikiWanHub</h1>
 
-    <a class="item"
-       href="https://qikiwanhub.github.io/qikiWanHubBadAI.github.io/"
-       target="_blank"
-       rel="noopener noreferrer">
-      <span class="idx">[01]</span>
-      <span class="name">智障 AI 模型</span>
-      <span class="meta">OPPO A5 / barely alive</span>
-      <span class="arrow">&gt;</span>
-    </a>
+  <p class="subtitle">
+    // 项目导航 · WORKS NAVIGATION
+  </p>
 
-    <!-- 示例：复制上面整段 <a>，改编号、名字、网址即可
-    <a class="item" href="https://你的网址" target="_blank" rel="noopener noreferrer">
-      <span class="idx">[02]</span>
-      <span class="name">新项目名字</span>
-      <span class="meta">简短说明</span>
-      <span class="arrow">&gt;</span>
-    </a>
-    -->
+  <p class="hero-note">
+    欢迎来到我的项目入口。这里收录了个人制作的网页、
+    实验项目和小工具，选择一个项目即可访问。
+  </p>
 
-  </nav>
+</section>
+
+<div class="rule">
+  <span>PROJECT_DIRECTORY</span>
+  <span>项目目录</span>
+</div>
+
+<section aria-label="项目搜索与分类">
+
+  <div class="toolbar">
+
+    <label class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input
+        id="search"
+        type="search"
+        placeholder="搜索项目名称或介绍……"
+        autocomplete="off"
+      >
+    </label>
+
+    <div class="count" id="count">
+      已收录 2 个项目
+    </div>
+
+  </div>
+
+  <div class="filters">
+
+    <button class="filter active" data-filter="全部" type="button">
+      全部项目
+    </button>
+
+    <button class="filter" data-filter="工具" type="button">
+      在线工具
+    </button>
+
+    <button class="filter" data-filter="实验" type="button">
+      实验项目
+    </button>
+
+  </div>
+
+</section>
+
+<nav class="project-list" aria-label="项目列表">
+
+  <!-- 项目 01 -->
+
+  <a
+    class="project"
+    href="https://qikiwanhub.github.io/qikiWanHubBadAI.github.io/"
+    target="_blank"
+    rel="noopener noreferrer"
+    data-category="实验"
+    data-search="智障 AI 模型 OPPO A5 实验 人工智能"
+  >
+
+    <div class="project-top">
+      <span class="project-index">[01] / EXPERIMENT</span>
+      <span class="project-type">实验项目</span>
+    </div>
+
+    <div class="project-name">
+      智障 AI 模型
+    </div>
+
+    <div class="project-desc">
+      一个有点特别的 AI 实验项目。点击进入在线页面。
+    </div>
+
+    <div class="project-bottom">
+      <span>OPPO A5 · AI EXPERIMENT</span>
+      <span class="project-arrow">›</span>
+    </div>
+
+  </a>
+
+  <!-- 项目 02 -->
+
+  <a
+    class="project"
+    href="https://qikiwanhub.github.io/qikiWanHubPiano.github.io/"
+    target="_blank"
+    rel="noopener noreferrer"
+    data-category="工具"
+    data-search="Qiki Piano 在线钢琴 HTML 弹琴 音乐 键盘"
+  >
+
+    <div class="project-top">
+      <span class="project-index">[02] / WEB APP</span>
+      <span class="project-type">在线工具</span>
+    </div>
+
+    <div class="project-name">
+      Qiki Piano · 在线钢琴
+    </div>
+
+    <div class="project-desc">
+      直接在浏览器里弹奏钢琴，支持鼠标、触屏和电脑键盘。
+    </div>
+
+    <div class="project-bottom">
+      <span>HTML · CSS · JAVASCRIPT</span>
+      <span class="project-arrow">›</span>
+    </div>
+
+  </a>
+
+</nav>
+
+<div class="empty" id="empty">
+  没有找到匹配的项目。换个关键词试试。
+</div>
+
+<footer class="footer">
+
+  <span>© QikiWanHub · 个人项目导航</span>
+
+  <span>
+    <a
+      href="https://github.com/qikiWanHub"
+      target="_blank"
+      rel="noopener noreferrer"
+    >GitHub 主页 ↗</a>
+
+    / SYSTEM V2.0
+  </span>
+
+</footer>
 
 </main>
 
 <script>
-/* 数字雨 */
-(function () {
-  const canvas = document.getElementById('matrix');
-  const ctx = canvas.getContext('2d');
-  const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEF<>/\\|{}[]$#@%&*';
+
+/* ===========================
+   项目搜索与分类筛选
+=========================== */
+
+(() => {
+
+  const search = document.getElementById("search");
+  const cards = [...document.querySelectorAll(".project")];
+  const filters = [...document.querySelectorAll(".filter")];
+
+  const count = document.getElementById("count");
+  const empty = document.getElementById("empty");
+
+  let activeFilter = "全部";
+
+  function update() {
+
+    const query = search.value.trim().toLocaleLowerCase();
+
+    let visible = 0;
+
+    cards.forEach(card => {
+
+      const categoryMatch =
+        activeFilter === "全部" ||
+        card.dataset.category === activeFilter;
+
+      const text = (
+        card.dataset.search + " " + card.textContent
+      ).toLocaleLowerCase();
+
+      const searchMatch =
+        !query || text.includes(query);
+
+      const show = categoryMatch && searchMatch;
+
+      card.hidden = !show;
+
+      if (show) visible++;
+
+    });
+
+    count.textContent =
+      "显示 " + visible + " / " + cards.length + " 个项目";
+
+    empty.classList.toggle("show", visible === 0);
+
+  }
+
+  search.addEventListener("input", update);
+
+  filters.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      activeFilter = button.dataset.filter;
+
+      filters.forEach(item => {
+
+        const active = item === button;
+
+        item.classList.toggle("active", active);
+
+        item.setAttribute(
+          "aria-pressed",
+          String(active)
+        );
+
+      });
+
+      update();
+
+    });
+
+  });
+
+  filters.forEach(button => {
+    button.setAttribute(
+      "aria-pressed",
+      String(button.classList.contains("active"))
+    );
+  });
+
+  update();
+
+  // 按 / 快速打开搜索框，按 ESC 清空搜索
+  window.addEventListener("keydown", event => {
+
+    const target = event.target;
+
+    if (
+      event.key === "/" &&
+      target.tagName !== "INPUT" &&
+      target.tagName !== "TEXTAREA"
+    ) {
+      event.preventDefault();
+      search.focus();
+    }
+
+    if (event.key === "Escape" && target === search) {
+      search.value = "";
+      update();
+      search.blur();
+    }
+
+  });
+
+})();
+
+
+/* ===========================
+   背景数字雨特效
+=========================== */
+
+(() => {
+
+  const canvas = document.getElementById("matrix");
+  const context = canvas.getContext("2d");
+
+  const reducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+
+  if (reducedMotion || !context) {
+    canvas.style.display = "none";
+    return;
+  }
+
+  const symbols =
+    "アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEF<>/\\|{}[]$#@%&*";
+
   const fontSize = 15;
-  let cols = 0, drops = [];
+
+  let columns = 0;
+  let drops = [];
+  let animationId = 0;
+  let running = false;
 
   function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    cols = Math.floor(canvas.width / fontSize);
-    drops = new Array(cols).fill(0).map(() => Math.random() * -50);
+
+    const ratio = Math.min(
+      window.devicePixelRatio || 1,
+      1.5
+    );
+
+    canvas.width = Math.floor(
+      window.innerWidth * ratio
+    );
+
+    canvas.height = Math.floor(
+      window.innerHeight * ratio
+    );
+
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+
+    context.setTransform(
+      ratio, 0, 0, ratio, 0, 0
+    );
+
+    columns = Math.ceil(
+      window.innerWidth / fontSize
+    );
+
+    drops = Array.from(
+      { length: columns },
+      () => Math.random() * -35
+    );
+
   }
-  resize();
-  window.addEventListener('resize', resize);
 
   function draw() {
-    ctx.fillStyle = 'rgba(0,0,0,0.08)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.font = fontSize + 'px monospace';
-    for (let i = 0; i < cols; i++) {
-      const ch = chars[Math.floor(Math.random() * chars.length)];
+
+    if (!running) return;
+
+    context.fillStyle = "rgba(0,0,0,.10)";
+
+    context.fillRect(
+      0,
+      0,
+      window.innerWidth,
+      window.innerHeight
+    );
+
+    context.font = fontSize + "px monospace";
+
+    for (let i = 0; i < columns; i++) {
+
+      const character =
+        symbols[Math.floor(Math.random() * symbols.length)];
+
       const y = drops[i] * fontSize;
-      ctx.fillStyle = Math.random() > 0.97 ? '#ccffdd' : '#00ff41';
-      ctx.fillText(ch, i * fontSize, y);
-      if (y > canvas.height && Math.random() > 0.975) drops[i] = 0;
-      drops[i]++;
+
+      context.fillStyle =
+        Math.random() > .985
+          ? "#caffd7"
+          : "#00ff65";
+
+      context.fillText(
+        character,
+        i * fontSize,
+        y
+      );
+
+      if (
+        y > window.innerHeight &&
+        Math.random() > .975
+      ) {
+        drops[i] = 0;
+      }
+
+      drops[i] += .7;
+
     }
+
+    animationId = requestAnimationFrame(draw);
+
   }
-  setInterval(draw, 55);
+
+  function start() {
+
+    if (running || document.hidden) return;
+
+    running = true;
+
+    animationId = requestAnimationFrame(draw);
+
+  }
+
+  function stop() {
+
+    running = false;
+
+    cancelAnimationFrame(animationId);
+
+  }
+
+  resize();
+
+  window.addEventListener(
+    "resize",
+    resize,
+    { passive: true }
+  );
+
+  document.addEventListener(
+    "visibilitychange",
+    () => {
+
+      if (document.hidden) {
+        stop();
+      } else {
+        start();
+      }
+
+    }
+  );
+
+  start();
+
 })();
+
 </script>
+
 </body>
 </html>
